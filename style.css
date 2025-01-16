@@ -1,0 +1,19 @@
+.center_div {
+    display: flex; /* Use flexbox to lay out the links horizontally */
+    justify-content: space-between; /* Space out the links */
+    gap: 20px; /* Optional: adds spacing between links */
+    background-color: #3498db; /* Optional background color */
+    padding: 20px; /* Optional padding for the div */
+    border-radius: 10px; /* Optional: adds rounded corners */
+}
+
+.center_div a {
+    color: white; /* Link text color */
+    text-decoration: none; /* Remove underline from links */
+    font-size: 18px; /* Font size for links */
+    font-weight: bold; /* Make text bold */
+}
+
+.center_div a:hover {
+    text-decoration: underline; /* Underline the links on hover */
+}
