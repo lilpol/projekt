@@ -1,11 +1,10 @@
-
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-<title>Inzerce, inzeráty, bazar</title>
-</head>
-<body>
 <?php
+session_start();
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit();
+}
+
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -18,15 +17,59 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-?>
-    
-    <h2>home</h2>
-    <a href="index3.php">home</a>
-    <a href="login.php">login</a>
+
+$sql = "SELECT id, name, description, price, autor FROM products";
+$result = $conn->query($sql);
+
+$username = htmlspecialchars($_SESSION['username']);
+if ($username=="admin") {
+    echo <<<admin
+    <a href="delproduct.php">delete produckts</a>
+admin;
+}
+echo <<<HTML
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <title>Inzerce, inzeráty, bazar</title>
+</head>
+<body>
+    <h2>Welcome, {$username}!</h2>
+    <a href="logout.php">Logout</a>
     <div>
-        <a href="produkt"></a>
+        <a href="disproducts.php">search</a> <br>
+        <a href="add_produckt.php">Add Product</a>
+    </div>
+    <div class="product-container">
+HTML;
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $name = htmlspecialchars($row['name']);
+        $description = htmlspecialchars($row['description']);
+        $price = number_format($row['price'], 2);
+        $autor = htmlspecialchars($row['autor']);
+        
+
+        
+        echo <<<PRODUCT
+        <div class='product'>
+            <h3>{$name}</h3>
+            <p>{$description}</p>
+            <p class='price'>\${$price}</p>
+            <p>{$autor}</p>
+        </div>
+PRODUCT;
+    }
+} else {
+    echo "<p>No products available.</p>";
+}
+
+echo <<<HTML
     </div>
 
-
-
 </body>
+</html>
+HTML;
+
+$conn->close();
