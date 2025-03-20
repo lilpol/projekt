@@ -18,58 +18,180 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT id, name, description, price, autor FROM products";
+// Fetch products and their associated user
+$sql = "SELECT products.id, products.name, products.description, products.price, userdata.username 
+        FROM products 
+        JOIN userdata ON products.user_id = userdata.id";
 $result = $conn->query($sql);
 
+
 $username = htmlspecialchars($_SESSION['username']);
-if ($username=="admin") {
-    echo <<<admin
-    <a href="delproduct.php">delete produckts</a>
-admin;
-}
-echo <<<HTML
+$isAdmin = ($username === "admin");
+
+?>
+
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <title>Inzerce, inzeráty, bazar</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Listings</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .nav-links {
+            margin-bottom: 20px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            background: #6a11cb;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 5px;
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #2575fc;
+        }
+
+        .product-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .product:hover {
+            transform: scale(1.05);
+        }
+
+        .product h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .price {
+            color: green;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: red;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .logout-btn:hover {
+            background: darkred;
+        }
+
+        .admin-btn {
+            background: #ff9800;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .admin-btn:hover {
+            background: #e68900;
+        }
+    </style>
 </head>
 <body>
-    <h2>Welcome, {$username}!</h2>
-    <a href="logout.php">Logout</a>
-    <div>
-        <a href="disproducts.php">search</a> <br>
-        <a href="add_produckt.php">Add Product</a>
+
+<div class="container">
+    <h2>Welcome, <?php echo $username; ?>!</h2>
+
+    <div class="nav-links">
+        <a href="disproducts.php">🔍 Search</a>
+        <a href="add_produckt.php">➕ Add Product</a>
+        <a href="logout.php" class="logout-btn">🚪 Logout</a>
     </div>
+
+    <?php if ($isAdmin): ?>
+        <a href="delproduct.php" class="admin-btn">🗑 Delete Products</a>
+    <?php endif; ?>
+
     <div class="product-container">
-HTML;
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $name = htmlspecialchars($row['name']);
+                $description = htmlspecialchars($row['description']);
+                $price = number_format($row['price'], 2);
+                $username = htmlspecialchars($row['username']);
+        ?>
+    <div class="product-container">
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $name = htmlspecialchars($row['name']);
+                $description = htmlspecialchars($row['description']);
+                $price = number_format($row['price'], 2);
 
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $name = htmlspecialchars($row['name']);
-        $description = htmlspecialchars($row['description']);
-        $price = number_format($row['price'], 2);
-        $autor = htmlspecialchars($row['autor']);
-        
-
-        
-        echo <<<PRODUCT
-        <div class='product'>
-            <h3>{$name}</h3>
-            <p>{$description}</p>
-            <p class='price'>\${$price}</p>
-            <p>{$autor}</p>
-        </div>
+                echo <<<PRODUCT
+                <div class='product'>
+                    <h3>{$name}</h3>
+                    <p>{$description}</p>
+                    <p class='price'>\${$price}</p>
+                </div>
 PRODUCT;
-    }
-} else {
-    echo "<p>No products available.</p>";
-}
-
-echo <<<HTML
+            }
+        } else {
+            echo "<p>No products found.</p>";
+        }
+        ?>
     </div>
 
 </body>
 </html>
-HTML;
 
+<?php
 $conn->close();
+    }
+}
+?>
