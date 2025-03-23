@@ -1,9 +1,9 @@
 <?php
 session_start();
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "test";
+$servername = "dbs.spskladno.cz";
+$username = "student2";
+$password = "spsnet";
+$dbname = "vyuka2";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -36,7 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $price = $_POST['price'];
 
     // Insert product with user_id
-    $stmt = $conn->prepare("INSERT INTO products (name, description, price, user_id) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO Products1 (name, description, price, author_id) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("ssdi", $name, $description, $price, $user_id);
 
     if ($stmt->execute()) {

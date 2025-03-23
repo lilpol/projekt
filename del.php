@@ -1,9 +1,8 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "test";
-
+$servername = "dbs.spskladno.cz";
+$username = "student2";
+$password = "spsnet";
+$dbname = "vyuka2";
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Check connection
@@ -16,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['id'])) {
     $id = intval($_POST['id']); // Ensure it's an integer for safety
 
     // Prepare DELETE statement
-    $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
+    $stmt = $conn->prepare("DELETE FROM Products1 WHERE id = ?");
     $stmt->bind_param("i", $id);
 
     if ($stmt->execute()) {

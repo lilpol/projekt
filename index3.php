@@ -5,10 +5,10 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "test";
+$servername = "dbs.spskladno.cz";
+$username = "student2";
+$password = "spsnet";
+$dbname = "vyuka2";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -19,9 +19,9 @@ if ($conn->connect_error) {
 }
 
 // Fetch products and their associated user
-$sql = "SELECT products.id, products.name, products.description, products.price, userdata.username 
-        FROM products 
-        JOIN userdata ON products.user_id = userdata.id";
+$sql = "SELECT Products1.id, Products1.name, Products1.description, Products1.price, userdata.username 
+        FROM Products1 
+        JOIN userdata ON Products1.author_id = userdata.id";
 $result = $conn->query($sql);
 
 
@@ -126,19 +126,6 @@ $isAdmin = ($username === "admin");
             background: darkred;
         }
 
-        .admin-btn {
-            background: #ff9800;
-            color: white;
-            padding: 10px 15px;
-            text-decoration: none;
-            border-radius: 5px;
-            display: inline-block;
-            margin-top: 10px;
-        }
-
-        .admin-btn:hover {
-            background: #e68900;
-        }
     </style>
 </head>
 <body>
@@ -149,42 +136,16 @@ $isAdmin = ($username === "admin");
     <div class="nav-links">
         <a href="disproducts.php">🔍 Search</a>
         <a href="add_produckt.php">➕ Add Product</a>
+        <a href="delproduct.php">🗑 Delete Products</a>
         <a href="logout.php" class="logout-btn">🚪 Logout</a>
     </div>
 
-    <?php if ($isAdmin): ?>
-        <a href="delproduct.php" class="admin-btn">🗑 Delete Products</a>
-    <?php endif; ?>
+ 
 
-    <div class="product-container">
-        <?php
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $name = htmlspecialchars($row['name']);
-                $description = htmlspecialchars($row['description']);
-                $price = number_format($row['price'], 2);
-                $username = htmlspecialchars($row['username']);
-        ?>
-    <div class="product-container">
-        <?php
-        if ($result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $name = htmlspecialchars($row['name']);
-                $description = htmlspecialchars($row['description']);
-                $price = number_format($row['price'], 2);
 
-                echo <<<PRODUCT
-                <div class='product'>
-                    <h3>{$name}</h3>
-                    <p>{$description}</p>
-                    <p class='price'>\${$price}</p>
-                </div>
-PRODUCT;
-            }
-        } else {
-            echo "<p>No products found.</p>";
-        }
-        ?>
+
+
+    
     </div>
 
 </body>
@@ -192,6 +153,5 @@ PRODUCT;
 
 <?php
 $conn->close();
-    }
-}
+
 ?>
