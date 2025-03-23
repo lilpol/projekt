@@ -40,10 +40,8 @@ def validate_login():
     user = cursor.fetchone()
 
     if user:
-        # Compare entered password with hashed password stored in the database
         stored_password = user[2]  # The hashed password in the database
         if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')): 
-            # Successful login
             messagebox.showinfo("Login Success", f"Welcome {user[1]}!")
             login_window.destroy()  # Close login window
             open_product_list(user[0])  # Open the product list window
@@ -52,11 +50,9 @@ def validate_login():
     else:
         messagebox.showerror("Login Error", "Invalid username or password.")
     
-
-
 # Function to open the product list window
 def open_product_list(user_id):
-    global root  # Global variable to hold the main Tkinter root
+    global root
 
     root = tk.Tk()
     root.title("Product List")
@@ -93,15 +89,18 @@ def open_product_list(user_id):
     product_list.column("ID", width=40)
     product_list.column("Price", width=70)
 
-    product_list.bind("<Double-1>", lambda event: open_profile(event, product_list))  # Open profile on double click
     product_list.pack(pady=10, fill=tk.BOTH, expand=True)
 
-    fetch_products(min_price_entry, max_price_entry, search_entry, product_list)  # Load products initially
+    # Delete Button
+    delete_button = tk.Button(root, text="Delete Selected", command=lambda: delete_product(product_list, user_id))
+    delete_button.pack(pady=5)
+
+    fetch_products(min_price_entry, max_price_entry, search_entry, product_list, user_id)  # Load products initially
 
     root.mainloop()
 
 # Function to fetch products based on filters
-def fetch_products(min_price_entry, max_price_entry, search_entry, product_list):
+def fetch_products(min_price_entry, max_price_entry, search_entry, product_list, user_id):
     min_price = min_price_entry.get() or "0"
     max_price = max_price_entry.get() or "100000"
     search = search_entry.get() or ""
@@ -137,33 +136,33 @@ def fetch_products(min_price_entry, max_price_entry, search_entry, product_list)
     for product in results:
         product_list.insert("", "end", values=product)
 
-
-# Function to open user profile window
-def open_profile(event, product_list):
+# Function to delete a selected product
+def delete_product(product_list, user_id):
     selected_item = product_list.selection()
     if not selected_item:
+        messagebox.showerror("Delete Error", "Please select a product to delete.")
         return
 
     item = product_list.item(selected_item)
-    user_id = item["values"][5]
+    product_id = item["values"][0]  # Product ID
+    owner_id = item["values"][5]  # User ID of the product owner
+
+    if user_id != owner_id:
+        messagebox.showerror("Delete Error", "You can only delete your own products.")
+        return
+
+    confirm = messagebox.askyesno("Confirm Delete", "Are you sure you want to delete this product?")
+    if not confirm:
+        return
 
     conn = create_connection()
     cursor = conn.cursor()
-
-    cursor.execute("SELECT username, email FROM userdata WHERE id=%s", (user_id,))
-    user = cursor.fetchone()
-
-    if user:
-        profile_window = tk.Toplevel(root)
-        profile_window.title(f"{user[0]}'s Profile")
-        profile_window.geometry("300x200")
-        
-        tk.Label(profile_window, text=f"Username: {user[0]}", font=("Arial", 12)).pack(pady=10)
-        tk.Label(profile_window, text=f"Email: {user[1]}", font=("Arial", 12)).pack(pady=10)
-        tk.Button(profile_window, text="Close", command=profile_window.destroy).pack(pady=20)
-
-    cursor.close()
+    cursor.execute("DELETE FROM Products1 WHERE id = %s AND author_id = %s", (product_id, user_id))
+    conn.commit()
     conn.close()
+
+    messagebox.showinfo("Success", "Product deleted successfully.")
+    product_list.delete(selected_item)
 
 # GUI Setup for Login Window
 login_window = tk.Tk()
