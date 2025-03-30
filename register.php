@@ -1,3 +1,4 @@
+
 <?php
 $servername = "dbs.spskladno.cz";
 $username = "student2";
@@ -19,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
     $rpassword = $_POST['rpassword'];
-
+    $email = $_POST['email'];
     // Check if username already exists
     $checkusername = $conn->prepare("SELECT username FROM userdata WHERE username = ?");
     $checkusername->bind_param("s", $username);
@@ -33,8 +34,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         // Insert user into database
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $stmt = $conn->prepare("INSERT INTO userdata (username, password) VALUES (?, ?)");
-        $stmt->bind_param("ss", $username, $hashed_password);
+        $stmt = $conn->prepare("INSERT INTO userdata (username, password, email) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $username, $hashed_password, $email);
 
         if ($stmt->execute()) {
             $messageg = "✅ Account created successfully!";
@@ -104,7 +105,7 @@ $conn->close();
             color: #4CAF50;
         }
 
-        input[type="text"], input[type="password"] {
+        input[type="text"], input[type="password"], input[type="email"]{
             width: 100%;
             padding: 10px;
             margin: 8px 0;
@@ -168,6 +169,9 @@ $conn->close();
 
         <label for="rpassword"><b>Repeat Password</b></label>
         <input type="password" placeholder="Repeat Password" name="rpassword" required>
+
+        <label for="email"><b>enter your email</b></label>
+        <input type="email" placeholder="email" name="email" required>
 
         <button type="submit" class="signupbut">Sign Up</button>
     </form>
